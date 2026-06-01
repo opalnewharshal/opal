@@ -1,13 +1,10 @@
 # OPAL — Outcome-Predictive Agent Layer
 
-[![CNCF Sandbox Candidate](https://img.shields.io/badge/CNCF-Sandbox%20Candidate-blue)](https://github.com/cncf/sandbox)
+[![CNCF Sandbox Candidate](https://img.shields.io/badge/CNCF-Sandbox%20Candidate-blue)](https://github.com/cncf/sandbox/issues/492)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/HarshalSant/opal)](https://goreportcard.com/report/github.com/HarshalSant/opal)
-[![CI](https://github.com/HarshalSant/opal/actions/workflows/ci.yaml/badge.svg)](https://github.com/HarshalSant/opal/actions/workflows/ci.yaml)
-[![GitHub Stars](https://img.shields.io/github/stars/HarshalSant/opal?style=social)](https://github.com/HarshalSant/opal)
-
-> **Current home:** [github.com/HarshalSant/opal](https://github.com/HarshalSant/opal)
-> — will transfer to `github.com/opal-io/opal` once the `opal-io` org is established.
+[![Go Report Card](https://goreportcard.com/badge/github.com/opalnewharshal/opal)](https://goreportcard.com/report/github.com/opalnewharshal/opal)
+[![CI](https://github.com/opalnewharshal/opal/actions/workflows/ci.yaml/badge.svg)](https://github.com/opalnewharshal/opal/actions/workflows/ci.yaml)
+[![GitHub Stars](https://img.shields.io/github/stars/opalnewharshal/opal?style=social)](https://github.com/opalnewharshal/opal)
 
 **OPAL** is a Kubernetes-native control plane extension that replaces manual
 YAML configuration with **declared business outcomes**, and replaces reactive
