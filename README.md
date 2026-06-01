@@ -172,13 +172,13 @@ helm install opal opal/opal \
 
 ```bash
 # Install CRDs
-kubectl apply -f https://github.com/opal-io/opal/releases/latest/download/crds.yaml
+kubectl apply -f https://github.com/opalnewharshal/opal/releases/latest/download/crds.yaml
 
 # Install controller
-kubectl apply -f https://github.com/opal-io/opal/releases/latest/download/opal.yaml
+kubectl apply -f https://github.com/opalnewharshal/opal/releases/latest/download/opal.yaml
 
 # Install agents
-kubectl apply -f https://github.com/opal-io/opal/releases/latest/download/agents.yaml
+kubectl apply -f https://github.com/opalnewharshal/opal/releases/latest/download/agents.yaml
 ```
 
 ### Deploy Your First WorkloadOutcome
@@ -212,7 +212,7 @@ kubectl get events -n production --field-selector reason=OPALOutcomeApplied
 - **CNCF Slack**: [#opal](https://cloud-native.slack.com/archives/opal)
 - **Mailing List**: cncf-opal-dev@lists.cncf.io
 - **Community Meetings**: Bi-weekly — details in Slack
-- **GitHub Discussions**: [Discussions](https://github.com/opal-io/opal/discussions)
+- **GitHub Discussions**: [Discussions](https://github.com/opalnewharshal/opal/discussions)
 
 ---
 
