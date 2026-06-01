@@ -1,0 +1,179 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: workloadoutcomes.opal.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: opal.io
+  names:
+    kind: WorkloadOutcome
+    listKind: WorkloadOutcomeList
+    plural: workloadoutcomes
+    singular: workloadoutcome
+    shortNames:
+      - wo
+    categories:
+      - opal
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Target
+          type: string
+          jsonPath: .spec.targetRef.name
+        - name: Availability
+          type: string
+          jsonPath: .spec.slo.availability
+        - name: LatencyP99
+          type: integer
+          jsonPath: .spec.slo.latencyP99Ms
+        - name: AutoApply
+          type: boolean
+          jsonPath: .spec.autoApply
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: WorkloadOutcome allows operators to declare business outcomes
+            instead of Kubernetes configuration. OPAL derives and manages all
+            Kubernetes resources to achieve the declared outcomes.
+          type: object
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              required:
+                - targetRef
+                - slo
+              properties:
+                targetRef:
+                  type: object
+                  required:
+                    - kind
+                    - name
+                  properties:
+                    kind:
+                      type: string
+                      enum: [Deployment, StatefulSet, DaemonSet, Rollout]
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                slo:
+                  type: object
+                  properties:
+                    latencyP99Ms:
+                      type: integer
+                      minimum: 1
+                      description: 99th-percentile latency target in milliseconds.
+                    latencyP95Ms:
+                      type: integer
+                      minimum: 1
+                    availability:
+                      type: string
+                      pattern: '^(100|[0-9]{1,2}(\.[0-9]{1,4})?)$'
+                      description: Target availability percentage (e.g., "99.95").
+                    errorRatePercent:
+                      type: string
+                      pattern: '^[0-9]+(\.[0-9]+)?$'
+                    throughputRPS:
+                      type: integer
+                      minimum: 1
+                cost:
+                  type: object
+                  required:
+                    - monthlyCeiling
+                  properties:
+                    monthlyCeiling:
+                      type: string
+                      pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+                    currency:
+                      type: string
+                      default: USD
+                compliance:
+                  type: array
+                  items:
+                    type: string
+                horizon:
+                  type: string
+                  default: "24h"
+                  description: How far ahead to predict and pre-position resources.
+                autoApply:
+                  type: boolean
+                  default: false
+                  description: Automatically apply derived configurations without approval.
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum: [Pending, Analyzing, Active, Violated, Suspended]
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    required: [type, status, reason, lastTransitionTime]
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                      reason:
+                        type: string
+                      message:
+                        type: string
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                lastReconciledAt:
+                  type: string
+                  format: date-time
+                currentCostEstimate:
+                  type: string
+                sloViolations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      observedValue:
+                        type: string
+                      threshold:
+                        type: string
+                      severity:
+                        type: string
+                      detectedAt:
+                        type: string
+                        format: date-time
+                agentDecisions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      agentName:
+                        type: string
+                      action:
+                        type: string
+                      reasoning:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      applied:
+                        type: boolean

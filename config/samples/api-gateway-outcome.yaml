@@ -1,0 +1,35 @@
+---
+# Example: API gateway with high throughput and cost-optimisation focus.
+apiVersion: opal.io/v1alpha1
+kind: WorkloadOutcome
+metadata:
+  name: api-gateway
+  namespace: production
+  labels:
+    team: platform
+    domain: ingress
+spec:
+  targetRef:
+    kind: Deployment
+    name: api-gateway
+    namespace: production
+  slo:
+    latencyP99Ms: 120
+    availability: "99.9"
+    errorRatePercent: "0.5"
+    throughputRPS: 2000
+  cost:
+    monthlyCeiling: "250"
+    currency: USD
+  horizon: 24h
+  autoApply: false   # Manual approval required for gateway changes
+---
+apiVersion: opal.io/v1alpha1
+kind: ClusterForecast
+metadata:
+  name: cluster-forecast
+  namespace: opal-system
+spec:
+  horizon: 72h
+  refreshInterval: 15m
+  minConfidence: "0.65"

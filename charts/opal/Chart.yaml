@@ -1,0 +1,54 @@
+apiVersion: v2
+name: opal
+description: >
+  OPAL (Outcome-Predictive Agent Layer) — A Kubernetes-native control plane
+  extension that replaces manual YAML with declared business outcomes and
+  predictive pre-reconciliation powered by kagent AI agents.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - kubernetes
+  - ai
+  - agents
+  - kagent
+  - outcomes
+  - slo
+  - platform-engineering
+  - cncf
+home: https://github.com/opal-io/opal
+sources:
+  - https://github.com/opal-io/opal
+maintainers:
+  - name: OPAL Maintainers
+    email: cncf-opal-maintainers@lists.cncf.io
+    url: https://github.com/opal-io/opal
+icon: https://raw.githubusercontent.com/opal-io/opal/main/docs/logo.png
+annotations:
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/operator: "true"
+  artifacthub.io/operatorCapabilities: Deep Insights
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release of OPAL
+  artifacthub.io/crds: |
+    - kind: WorkloadOutcome
+      version: v1alpha1
+      name: workloadoutcomes.opal.io
+      displayName: Workload Outcome
+      description: Declare business outcomes instead of Kubernetes configuration
+    - kind: ClusterForecast
+      version: v1alpha1
+      name: clusterforecasts.opal.io
+      displayName: Cluster Forecast
+      description: AI-generated predictions about future cluster state
+    - kind: OutcomeBinding
+      version: v1alpha1
+      name: outcomebindings.opal.io
+      displayName: Outcome Binding
+      description: Bind outcomes to workloads with approval policies
+dependencies:
+  - name: kagent
+    repository: https://kagent-dev.github.io/kagent/helm-charts
+    version: ">=0.1.0"
+    condition: kagent.enabled

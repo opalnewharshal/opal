@@ -1,0 +1,129 @@
+# OPAL Helm Chart Values
+# See https://github.com/opal-io/opal/docs/configuration.md for full reference.
+
+# -- Number of OPAL controller replicas.
+replicaCount: 1
+
+image:
+  # -- Container image repository.
+  repository: ghcr.io/opal-io/opal
+  # -- Image pull policy.
+  pullPolicy: IfNotPresent
+  # -- Image tag. Defaults to chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Create a service account for OPAL.
+  create: true
+  # -- Annotations to add to the service account.
+  annotations: {}
+  # -- Name of the service account. Auto-generated if empty.
+  name: ""
+
+# -- Pod annotations.
+podAnnotations: {}
+
+# -- Pod security context.
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container security context.
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+# -- Controller resource requests and limits.
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+# -- Node selector for the controller pod.
+nodeSelector: {}
+
+# -- Tolerations for the controller pod.
+tolerations: []
+
+# -- Affinity rules for the controller pod.
+affinity: {}
+
+# LLM configuration for kagent agents
+llm:
+  # -- LLM provider: anthropic | openai | google | ollama
+  provider: anthropic
+  # -- Model name.
+  model: claude-sonnet-4-6
+  # -- Name of the Kubernetes Secret containing the API key.
+  apiKeySecret: opal-llm-secret
+  # -- Key within the secret that holds the API key.
+  apiKeySecretKey: api-key
+
+# OPAL controller configuration
+controller:
+  # -- Leader election for HA deployments.
+  leaderElection: false
+  # -- How far back ClusterMemory retains entries per workload.
+  memoryWindow: "720h"
+  # -- Maximum memory entries per workload.
+  memoryMaxEntries: 10000
+  # -- Historical window used by the statistical forecaster.
+  forecastLookback: "720h"
+
+# ClusterMemory persistence
+memory:
+  # -- Persist ClusterMemory snapshots to a PersistentVolumeClaim.
+  persistence:
+    enabled: false
+    size: 1Gi
+    storageClass: ""
+
+# kagent sub-chart configuration
+kagent:
+  # -- Install kagent as a dependency. Set false if kagent is already installed.
+  enabled: true
+
+# Metrics
+metrics:
+  # -- Expose Prometheus metrics.
+  enabled: true
+  # -- Port to expose metrics on.
+  port: 8080
+  serviceMonitor:
+    # -- Create a Prometheus ServiceMonitor.
+    enabled: false
+    interval: 30s
+    namespace: ""
+
+# Install CRDs via Helm
+crds:
+  # -- Install CRDs. Disable if managing CRDs separately.
+  install: true
+  # -- Keep CRDs on chart uninstall.
+  keep: true
+
+# OPAL agents configuration
+agents:
+  forecast:
+    enabled: true
+    maxIterations: 20
+  outcome:
+    enabled: true
+    maxIterations: 15
+  reconciler:
+    enabled: true
+    maxIterations: 25
+  audit:
+    enabled: true
+    maxIterations: 10

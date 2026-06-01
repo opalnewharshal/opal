@@ -1,0 +1,36 @@
+# Build artifacts
+bin/
+*.exe
+manager
+
+# Test output
+cover.out
+*.test
+
+# Go workspace
+vendor/
+go.sum.bak
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Helm
+charts/opal/charts/
+charts/opal/Chart.lock
+
+# Secrets (never commit these)
+*-secret.yaml
+*secret*.yaml
+.env
+*.env
+
+# Local dev overrides
+*.local.yaml
+kubeconfig

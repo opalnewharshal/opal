@@ -1,0 +1,19 @@
+# Build artifacts
+bin/
+*.test
+cover.out
+
+# Development
+.git/
+.github/
+charts/
+docs/
+config/
+agents/
+hack/
+*.md
+Makefile
+
+# Go
+vendor/
+testdata/

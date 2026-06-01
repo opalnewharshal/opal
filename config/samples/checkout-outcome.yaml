@@ -1,0 +1,54 @@
+---
+# Example: A checkout service with strict latency and PCI-DSS compliance requirements.
+# OPAL will derive all Kubernetes configuration needed to achieve these outcomes.
+apiVersion: opal.io/v1alpha1
+kind: WorkloadOutcome
+metadata:
+  name: checkout-service
+  namespace: production
+  labels:
+    team: payments
+    domain: checkout
+spec:
+  targetRef:
+    kind: Deployment
+    name: checkout
+    namespace: production
+  slo:
+    latencyP99Ms: 80
+    latencyP95Ms: 50
+    availability: "99.95"
+    errorRatePercent: "0.1"
+    throughputRPS: 500
+  cost:
+    monthlyCeiling: "400"
+    currency: USD
+  compliance:
+    - PCI-DSS
+    - SOC2
+  horizon: 72h
+  autoApply: true
+---
+# Bind the outcome with a change window: only apply changes Mon-Thu
+apiVersion: opal.io/v1alpha1
+kind: OutcomeBinding
+metadata:
+  name: checkout-service-binding
+  namespace: production
+spec:
+  outcomeRef:
+    name: checkout-service
+    namespace: production
+  targetRef:
+    kind: Deployment
+    name: checkout
+  approvalPolicy: Automatic
+  changeWindow:
+    allowedDays: [Monday, Tuesday, Wednesday, Thursday]
+    startTime: "02:00"
+    endTime: "06:00"
+    timezone: UTC
+  rollbackPolicy:
+    enabled: true
+    triggerAfterViolationCount: 3
+    maxRollbackAgeHours: 24

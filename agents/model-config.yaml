@@ -1,0 +1,20 @@
+---
+# ModelConfig for OPAL agents — uses Anthropic Claude by default.
+# Change provider/model as needed. The secret must contain the API key.
+apiVersion: kagent.dev/v1alpha1
+kind: ModelConfig
+metadata:
+  name: opal-model-config
+  namespace: opal-system
+  labels:
+    app.kubernetes.io/name: opal
+    app.kubernetes.io/component: agents
+spec:
+  provider: anthropic
+  model: claude-sonnet-4-6
+  apiKeySecretRef:
+    name: opal-llm-secret
+    key: api-key
+  parameters:
+    maxTokens: 4096
+    temperature: 0.1   # Low temperature for deterministic control plane decisions
