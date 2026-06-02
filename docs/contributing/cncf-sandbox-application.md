@@ -128,7 +128,7 @@ kagent maintainers.
 - GitHub repository under `cncf` or new `opal-io` org (or move existing repo)
 - Artifact Hub listing
 - CNCF Slack channel: `#opal`
-- Mailing list: `cncf-opal-dev@lists.cncf.io`
+- Mailing list: `harshalsant0@gmail.com (interim until org mailing list is set up)`
 - Zoom/calendar entry for bi-weekly community meetings
 
 ---
@@ -151,7 +151,7 @@ All dependencies are Apache 2.0 or compatible:
 - **GitHub Issues**: https://github.com/HarshalSant/opal/issues
 - **GitHub Discussions**: https://github.com/HarshalSant/opal/discussions
 - **CNCF Slack (planned)**: `#opal`
-- **Mailing list (planned)**: cncf-opal-dev@lists.cncf.io
+- **Mailing list (planned)**: harshalsant0@gmail.com (interim until org mailing list is set up)
 
 ---
 
@@ -168,7 +168,7 @@ All dependencies are Apache 2.0 or compatible:
 ## Statement on Security
 
 OPAL follows the security practices described in [SECURITY.md](../../SECURITY.md).
-Vulnerabilities are reported to `cncf-opal-security@lists.cncf.io` and
+Vulnerabilities are reported to `harshalsant0@gmail.com` and
 addressed within 48 hours.
 
 ---
