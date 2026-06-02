@@ -11,7 +11,7 @@
 **Please do not report security vulnerabilities through public GitHub issues.**
 
 To report a security vulnerability, please email:
-**cncf-opal-security@lists.cncf.io**
+**harshalsant0@gmail.com**
 
 You should receive a response within 48 hours. If not, please follow up.
 
