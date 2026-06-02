@@ -15,15 +15,15 @@ keywords:
   - outcomes
   - slo
   - platform-engineering
-  - cncf
-home: https://github.com/opal-io/opal
+  - cloud-native
+home: https://github.com/opalnewharshal/opal
 sources:
-  - https://github.com/opal-io/opal
+  - https://github.com/opalnewharshal/opal
 maintainers:
-  - name: OPAL Maintainers
-    email: cncf-opal-maintainers@lists.cncf.io
-    url: https://github.com/opal-io/opal
-icon: https://raw.githubusercontent.com/opal-io/opal/main/docs/logo.png
+  - name: HarshalSant
+    email: harshalsant0@gmail.com
+    url: https://github.com/opalnewharshal/opal
+icon: https://raw.githubusercontent.com/opalnewharshal/opal/main/docs/logo.png
 annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/operator: "true"

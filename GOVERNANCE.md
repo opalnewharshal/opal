@@ -2,8 +2,8 @@
 
 ## Overview
 
-OPAL (Outcome-Predictive Agent Layer) is a CNCF Sandbox project. This document
-defines the governance model for the project.
+OPAL (Outcome-Predictive Agent Layer) is an open-source Kubernetes project.
+This document defines the governance model for the project.
 
 ## Maintainers
 
@@ -16,8 +16,8 @@ and overall health of the project. The current maintainer list is stored in
 - Review and merge pull requests
 - Triage issues and feature requests
 - Manage releases
-- Represent the project at CNCF events
-- Ensure the project follows CNCF policies
+- Represent the project at community events
+- Ensure the project follows open source best practices
 
 ### Becoming a Maintainer
 
@@ -40,22 +40,21 @@ documentation is a contributor. Contributions of all kinds are welcome.
 
 ## Conflict Resolution
 
-Disagreements between maintainers are resolved by majority vote. If a vote
-is tied, the matter is escalated to the CNCF TOC.
+Disagreements between maintainers are resolved by majority vote.
 
-## CNCF Relationship
+## Open Source Values
 
-OPAL is a CNCF Sandbox project. We follow the
+OPAL is built on [kagent](https://kagent.dev), a CNCF Sandbox project.
+We follow the spirit of the
 [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md)
-and adhere to the
-[CNCF IP Policy](https://github.com/cncf/foundation/blob/main/charter.md#11-ip-policy).
+and are working toward CNCF Sandbox submission once we have established
+community adoption.
 
 ## Meetings
 
-Community meetings are held bi-weekly. Meeting details are posted in the
-[#opal channel on CNCF Slack](https://cloud-native.slack.com).
+Community discussions happen via
+[GitHub Discussions](https://github.com/opalnewharshal/opal/discussions).
 
 ## Amendments
 
-This governance document may be amended by a unanimous vote of all maintainers,
-subject to approval by the CNCF TOC.
+This governance document may be amended by a unanimous vote of all maintainers.

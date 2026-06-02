@@ -15,7 +15,7 @@ guidelines for contributing to the project.
 
 ```bash
 # Clone the repository
-git clone https://github.com/opal-io/opal.git
+git clone https://github.com/opalnewharshal/opal.git
 cd opal
 
 # Install dependencies
@@ -90,6 +90,6 @@ Please use the GitHub issue tracker. For security vulnerabilities, see
 
 ## Community
 
-- CNCF Slack: `#opal` channel
-- Mailing list: cncf-opal-dev@lists.cncf.io
-- Community meetings: bi-weekly (details in Slack)
+- **GitHub Discussions**: [github.com/opalnewharshal/opal/discussions](https://github.com/opalnewharshal/opal/discussions)
+- **GitHub Issues**: [github.com/opalnewharshal/opal/issues](https://github.com/opalnewharshal/opal/issues)
+- **kagent community**: [github.com/kagent-dev/kagent/discussions](https://github.com/kagent-dev/kagent/discussions) — OPAL is built on kagent
