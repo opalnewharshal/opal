@@ -1,6 +1,7 @@
 # OPAL — Outcome-Predictive Agent Layer
 
-[![CNCF Sandbox Candidate](https://img.shields.io/badge/CNCF-Sandbox%20Candidate-blue)](https://github.com/cncf/sandbox/issues/492)
+[![Open Source](https://img.shields.io/badge/Open%20Source-Apache%202.0-green)](LICENSE)
+[![Built on kagent](https://img.shields.io/badge/Built%20on-kagent%20CNCF-blue)](https://kagent.dev)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/opalnewharshal/opal)](https://goreportcard.com/report/github.com/opalnewharshal/opal)
 [![CI](https://github.com/opalnewharshal/opal/actions/workflows/ci.yaml/badge.svg)](https://github.com/opalnewharshal/opal/actions/workflows/ci.yaml)
@@ -147,7 +148,7 @@ it also uses SLO declarations to drive Kubernetes decisions. Here is the precise
 | Predictive | No — reactive only | Yes — acts before problems occur |
 | Cluster memory | No | Yes — learns patterns over time |
 | AI agents | No | Yes — 4 kagent agents as the control plane |
-| CNCF native | No | Yes — built on kagent (CNCF Sandbox) |
+| Built on CNCF project | No | Yes — built on kagent (CNCF Sandbox) |
 | Open source activity | Limited community | Actively building community |
 
 Intel IDO proves the idea is valid. OPAL goes significantly further.
@@ -249,19 +250,17 @@ kubectl get events -n production --field-selector reason=OPALOutcomeApplied
 
 ## Community
 
-- **CNCF Slack**: [#opal](https://cloud-native.slack.com/archives/opal)
-- **Mailing List**: cncf-opal-dev@lists.cncf.io
-- **Community Meetings**: Bi-weekly — details in Slack
-- **GitHub Discussions**: [Discussions](https://github.com/opalnewharshal/opal/discussions)
+- **GitHub Discussions**: [Start a discussion](https://github.com/opalnewharshal/opal/discussions)
+- **GitHub Issues**: [Report a bug or request a feature](https://github.com/opalnewharshal/opal/issues)
+- **kagent Community**: [Join the conversation](https://github.com/kagent-dev/kagent/discussions/1949) — OPAL is built on kagent
 
 ---
 
-## CNCF Membership
+## CNCF Ecosystem
 
-OPAL is a [CNCF Sandbox](https://www.cncf.io/projects/) project. The
-[Cloud Native Computing Foundation](https://cncf.io) (CNCF) is part of
-the Linux Foundation and provides support, oversight, and direction for
-fast-growing, cloud native open source projects.
+OPAL is built on [kagent](https://kagent.dev) — a CNCF Sandbox project.
+We are actively building community and plan to apply to CNCF once we have
+demonstrated adoption. Contributions and feedback are very welcome.
 
 ---
 
