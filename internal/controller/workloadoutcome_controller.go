@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -23,9 +24,20 @@ import (
 )
 
 const (
-	workloadOutcomeFinalizer = "opal.io/workloadoutcome-finalizer"
-	requeueAfter             = 5 * time.Minute
+	workloadOutcomeFinalizer    = "opal.io/workloadoutcome-finalizer"
+	requeueAfter                = 5 * time.Minute
+	// preOpalResourcesAnnotation stores a JSON snapshot of container resources
+	// taken immediately before OPAL first patches a Deployment. Used by
+	// OutcomeBindingReconciler to restore the original state on rollback.
+	preOpalResourcesAnnotation = "opal.io/pre-opal-resources"
 )
+
+// containerResourceSnapshot is serialised into preOpalResourcesAnnotation.
+type containerResourceSnapshot struct {
+	Name     string                      `json:"name"`
+	Requests corev1.ResourceList         `json:"requests,omitempty"`
+	Limits   corev1.ResourceList         `json:"limits,omitempty"`
+}
 
 // WorkloadOutcomeReconciler reconciles WorkloadOutcome objects.
 // It is the core controller that translates declared outcomes into
@@ -169,6 +181,30 @@ func (r *WorkloadOutcomeReconciler) applyDerivedConfig(
 	deploy *appsv1.Deployment,
 	derived *outcome.DerivedConfig,
 ) error {
+	// Snapshot original resources before OPAL touches the Deployment.
+	// Written only once so subsequent reconciles don't overwrite the baseline.
+	if deploy.Annotations == nil || deploy.Annotations[preOpalResourcesAnnotation] == "" {
+		snapshots := make([]containerResourceSnapshot, 0, len(deploy.Spec.Template.Spec.Containers))
+		for _, c := range deploy.Spec.Template.Spec.Containers {
+			snapshots = append(snapshots, containerResourceSnapshot{
+				Name:     c.Name,
+				Requests: c.Resources.Requests.DeepCopy(),
+				Limits:   c.Resources.Limits.DeepCopy(),
+			})
+		}
+		raw, err := json.Marshal(snapshots)
+		if err == nil {
+			annoPatch := client.MergeFrom(deploy.DeepCopy())
+			if deploy.Annotations == nil {
+				deploy.Annotations = map[string]string{}
+			}
+			deploy.Annotations[preOpalResourcesAnnotation] = string(raw)
+			if pErr := r.Patch(ctx, deploy, annoPatch); pErr != nil {
+				return fmt.Errorf("save pre-opal resource snapshot: %w", pErr)
+			}
+		}
+	}
+
 	patch := client.MergeFrom(deploy.DeepCopy())
 	derived.ApplyToDeployment(deploy)
 	if err := r.Patch(ctx, deploy, patch); err != nil {

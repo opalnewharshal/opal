@@ -51,6 +51,10 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - name: Verify go.sum is up to date
+        run: |
+          go mod tidy
+          git diff --exit-code go.sum
       - name: Build manager binary
         run: make build
       - name: Verify generated code is up to date

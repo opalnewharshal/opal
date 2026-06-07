@@ -1,0 +1,189 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: outcomebindings.opal.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: opal.io
+  names:
+    kind: OutcomeBinding
+    listKind: OutcomeBindingList
+    plural: outcomebindings
+    singular: outcomebinding
+    shortNames:
+      - ob
+    categories:
+      - opal
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Outcome
+          type: string
+          jsonPath: .spec.outcomeRef.name
+        - name: ApprovalPolicy
+          type: string
+          jsonPath: .spec.approvalPolicy
+        - name: LastApplied
+          type: date
+          jsonPath: .status.lastAppliedAt
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: OutcomeBinding binds a WorkloadOutcome to a workload and
+            controls how AI-derived configurations are reviewed and applied.
+          type: object
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              required:
+                - outcomeRef
+                - targetRef
+              properties:
+                outcomeRef:
+                  type: object
+                  description: Reference to the WorkloadOutcome to bind.
+                  properties:
+                    apiVersion:
+                      type: string
+                    kind:
+                      type: string
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                    resourceVersion:
+                      type: string
+                    uid:
+                      type: string
+                targetRef:
+                  type: object
+                  description: Identifies the workload to manage.
+                  required:
+                    - kind
+                    - name
+                  properties:
+                    kind:
+                      type: string
+                      enum: [Deployment, StatefulSet, DaemonSet, Rollout]
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                approvalPolicy:
+                  type: string
+                  default: Manual
+                  enum: [Automatic, Manual, DryRun]
+                  description: Controls how derived configurations are applied.
+                changeWindow:
+                  type: object
+                  description: Restricts when OPAL may apply configuration changes.
+                  properties:
+                    allowedDays:
+                      type: array
+                      items:
+                        type: string
+                        enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+                    startTime:
+                      type: string
+                      pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+                      description: Earliest time changes may be applied (HH:MM UTC).
+                    endTime:
+                      type: string
+                      pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+                      description: Latest time changes may be applied (HH:MM UTC).
+                    timezone:
+                      type: string
+                      default: UTC
+                      description: IANA timezone for the change window.
+                rollbackPolicy:
+                  type: object
+                  description: Controls automatic rollback behaviour.
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                    triggerAfterViolationCount:
+                      type: integer
+                      format: int32
+                      default: 3
+                      minimum: 1
+                      description: Number of consecutive SLO violations that trigger rollback.
+                    maxRollbackAgeHours:
+                      type: integer
+                      format: int32
+                      default: 24
+                      description: Limit rollback to configs applied within this window.
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum: [Pending, Bound, Applying, Applied, Violated, RolledBack]
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    required: [type, status, reason, lastTransitionTime]
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                      reason:
+                        type: string
+                      message:
+                        type: string
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                appliedConfigHash:
+                  type: string
+                  description: Hash of the last applied configuration.
+                lastAppliedAt:
+                  type: string
+                  format: date-time
+                pendingProposalRef:
+                  type: object
+                  properties:
+                    apiVersion:
+                      type: string
+                    kind:
+                      type: string
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                rollbackHistory:
+                  type: array
+                  items:
+                    type: object
+                    required: [timestamp, reason, outcome]
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                      reason:
+                        type: string
+                      restoredConfigHash:
+                        type: string
+                      outcome:
+                        type: string
+                        enum: [Resolved, Escalated, Unknown]

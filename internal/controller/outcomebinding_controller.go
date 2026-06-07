@@ -2,9 +2,14 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv2 "k8s.io/api/autoscaling/v2"
+	corev1 "k8s.io/api/core/v1"
+	policyv1 "k8s.io/api/policy/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -162,7 +167,80 @@ func (r *OutcomeBindingReconciler) shouldTriggerRollback(ob *opalv1alpha1.Outcom
 }
 
 func (r *OutcomeBindingReconciler) performRollback(ctx context.Context, ob *opalv1alpha1.OutcomeBinding, reason string) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
 	now := metav1.Now()
+
+	targetNS := ob.Spec.TargetRef.Namespace
+	if targetNS == "" {
+		targetNS = ob.Namespace
+	}
+
+	// 1. Disable autoApply on the WorkloadOutcome to stop further changes.
+	wo := &opalv1alpha1.WorkloadOutcome{}
+	woKey := types.NamespacedName{Name: ob.Spec.OutcomeRef.Name, Namespace: ob.Spec.OutcomeRef.Namespace}
+	if woKey.Namespace == "" {
+		woKey.Namespace = ob.Namespace
+	}
+	if err := r.Get(ctx, woKey, wo); err == nil && wo.Spec.AutoApply {
+		patch := client.MergeFrom(wo.DeepCopy())
+		wo.Spec.AutoApply = false
+		if pErr := r.Patch(ctx, wo, patch); pErr != nil {
+			logger.Error(pErr, "could not disable autoApply during rollback")
+		}
+	}
+
+	// 2. Restore the Deployment's pre-OPAL resource snapshot if one exists.
+	deploy := &appsv1.Deployment{}
+	deployKey := types.NamespacedName{Name: ob.Spec.TargetRef.Name, Namespace: targetNS}
+	if err := r.Get(ctx, deployKey, deploy); err == nil {
+		if raw, ok := deploy.Annotations[preOpalResourcesAnnotation]; ok && raw != "" {
+			var snapshots []containerResourceSnapshotRollback
+			if jsonErr := json.Unmarshal([]byte(raw), &snapshots); jsonErr == nil {
+				patch := client.MergeFrom(deploy.DeepCopy())
+				for i := range deploy.Spec.Template.Spec.Containers {
+					for _, snap := range snapshots {
+						if deploy.Spec.Template.Spec.Containers[i].Name == snap.Name {
+							deploy.Spec.Template.Spec.Containers[i].Resources = corev1.ResourceRequirements{
+								Requests: snap.Requests,
+								Limits:   snap.Limits,
+							}
+							break
+						}
+					}
+				}
+				if pErr := r.Patch(ctx, deploy, patch); pErr != nil {
+					logger.Error(pErr, "could not restore pre-OPAL resources during rollback")
+				} else {
+					logger.Info("restored pre-OPAL Deployment resources", "deployment", deployKey)
+				}
+			}
+		}
+	}
+
+	// 3. Delete OPAL-managed HPA and PDB for this workload.
+	hpa := &autoscalingv2.HorizontalPodAutoscaler{}
+	hpaKey := types.NamespacedName{
+		Name:      fmt.Sprintf("opal-%s", ob.Spec.TargetRef.Name),
+		Namespace: targetNS,
+	}
+	if err := r.Get(ctx, hpaKey, hpa); err == nil {
+		if delErr := r.Delete(ctx, hpa); delErr != nil && !errors.IsNotFound(delErr) {
+			logger.Error(delErr, "could not delete OPAL HPA during rollback")
+		}
+	}
+
+	pdb := &policyv1.PodDisruptionBudget{}
+	pdbKey := types.NamespacedName{
+		Name:      fmt.Sprintf("opal-%s", ob.Spec.TargetRef.Name),
+		Namespace: targetNS,
+	}
+	if err := r.Get(ctx, pdbKey, pdb); err == nil {
+		if delErr := r.Delete(ctx, pdb); delErr != nil && !errors.IsNotFound(delErr) {
+			logger.Error(delErr, "could not delete OPAL PDB during rollback")
+		}
+	}
+
+	// 4. Record rollback in status.
 	event := opalv1alpha1.RollbackEvent{
 		Timestamp: now,
 		Reason:    reason,
@@ -185,22 +263,68 @@ func (r *OutcomeBindingReconciler) performRollback(ctx context.Context, ob *opal
 	return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 }
 
+// containerResourceSnapshotRollback mirrors containerResourceSnapshot from the
+// WorkloadOutcome controller for JSON deserialisation during rollback.
+type containerResourceSnapshotRollback struct {
+	Name     string              `json:"name"`
+	Requests corev1.ResourceList `json:"requests,omitempty"`
+	Limits   corev1.ResourceList `json:"limits,omitempty"`
+}
+
 func (r *OutcomeBindingReconciler) isWithinChangeWindow(cw *opalv1alpha1.ChangeWindowSpec) bool {
 	if cw == nil {
 		return true
 	}
-	now := time.Now().UTC()
-	weekday := now.Weekday().String()
-	inDay := false
-	for _, d := range cw.AllowedDays {
-		if d == weekday {
-			inDay = true
-			break
+
+	loc := time.UTC
+	if cw.Timezone != "" && cw.Timezone != "UTC" {
+		if tz, err := time.LoadLocation(cw.Timezone); err == nil {
+			loc = tz
 		}
 	}
-	if len(cw.AllowedDays) > 0 && !inDay {
-		return false
+	now := time.Now().In(loc)
+
+	// Check allowed days.
+	if len(cw.AllowedDays) > 0 {
+		weekday := now.Weekday().String()
+		inDay := false
+		for _, d := range cw.AllowedDays {
+			if d == weekday {
+				inDay = true
+				break
+			}
+		}
+		if !inDay {
+			return false
+		}
 	}
+
+	// Check time-of-day window.
+	if cw.StartTime != "" && cw.EndTime != "" {
+		var startH, startM, endH, endM int
+		if _, err := fmt.Sscanf(cw.StartTime, "%d:%d", &startH, &startM); err != nil {
+			return false
+		}
+		if _, err := fmt.Sscanf(cw.EndTime, "%d:%d", &endH, &endM); err != nil {
+			return false
+		}
+		nowMins := now.Hour()*60 + now.Minute()
+		startMins := startH*60 + startM
+		endMins := endH*60 + endM
+
+		if startMins <= endMins {
+			// Normal window: e.g. 08:00–18:00
+			if nowMins < startMins || nowMins >= endMins {
+				return false
+			}
+		} else {
+			// Overnight window: e.g. 22:00–06:00
+			if nowMins < startMins && nowMins >= endMins {
+				return false
+			}
+		}
+	}
+
 	return true
 }
 

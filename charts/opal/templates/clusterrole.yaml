@@ -1,0 +1,41 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "opal.fullname" . }}-manager-role
+  labels:
+    {{- include "opal.labels" . | nindent 4 }}
+rules:
+  # OPAL CRDs
+  - apiGroups: [opal.io]
+    resources:
+      - workloadoutcomes
+      - workloadoutcomes/status
+      - workloadoutcomes/finalizers
+      - clusterforecasts
+      - clusterforecasts/status
+      - outcomebindings
+      - outcomebindings/status
+    verbs: [get, list, watch, create, update, patch, delete]
+  # Workloads
+  - apiGroups: [apps]
+    resources: [deployments, statefulsets, daemonsets]
+    verbs: [get, list, watch, update, patch]
+  # HPA
+  - apiGroups: [autoscaling]
+    resources: [horizontalpodautoscalers]
+    verbs: [get, list, watch, create, update, patch, delete]
+  # PDB
+  - apiGroups: [policy]
+    resources: [poddisruptionbudgets]
+    verbs: [get, list, watch, create, update, patch, delete]
+  # Events
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [create, patch]
+  # Leader election
+  - apiGroups: [coordination.k8s.io]
+    resources: [leases]
+    verbs: [get, list, watch, create, update, patch, delete]
+  - apiGroups: [""]
+    resources: [configmaps]
+    verbs: [get, list, watch, create, update, patch, delete]

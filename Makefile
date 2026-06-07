@@ -43,6 +43,10 @@ manifests: controller-gen ## Generate CRD manifests and RBAC.
 generate: controller-gen ## Generate deep copy and other code.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
+.PHONY: tidy
+tidy: ## Run go mod tidy to sync go.sum.
+	go mod tidy
+
 .PHONY: fmt
 fmt: ## Run go fmt.
 	go fmt ./...
@@ -73,7 +77,7 @@ test-e2e: ## Run end-to-end tests.
 ##@ Build
 
 .PHONY: build
-build: manifests generate fmt vet ## Build manager binary.
+build: tidy manifests generate fmt vet ## Build manager binary.
 	go build $(GO_BUILD_FLAGS) -o bin/manager ./cmd/main.go
 
 .PHONY: run

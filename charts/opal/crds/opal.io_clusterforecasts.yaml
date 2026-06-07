@@ -1,0 +1,149 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: clusterforecasts.opal.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: opal.io
+  names:
+    kind: ClusterForecast
+    listKind: ClusterForecastList
+    plural: clusterforecasts
+    singular: clusterforecast
+    shortNames:
+      - cf
+    categories:
+      - opal
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Health
+          type: string
+          jsonPath: .status.overallClusterHealth
+        - name: LastUpdated
+          type: date
+          jsonPath: .status.lastUpdated
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: ClusterForecast holds AI-generated predictions about future
+            cluster state. It is the primary output of the ForecastAgent and
+            drives pre-emptive reconciliation.
+          type: object
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              properties:
+                horizon:
+                  type: string
+                  default: "24h"
+                refreshInterval:
+                  type: string
+                  default: "15m"
+                minConfidence:
+                  type: string
+                  default: "0.7"
+                  pattern: '^(0(\.[0-9]+)?|1(\.0+)?)$'
+                workloadSelectors:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      namespace:
+                        type: string
+                      labelSelector:
+                        type: object
+                        properties:
+                          matchLabels:
+                            type: object
+                            additionalProperties:
+                              type: string
+            status:
+              type: object
+              properties:
+                overallClusterHealth:
+                  type: string
+                  enum: [Healthy, AtRisk, Critical]
+                lastUpdated:
+                  type: string
+                  format: date-time
+                modelVersion:
+                  type: string
+                forecasts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      workloadRef:
+                        type: string
+                      confidence:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                      riskScore:
+                        type: integer
+                        minimum: 0
+                        maximum: 100
+                      predictedEvents:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                            predictedAt:
+                              type: string
+                              format: date-time
+                            confidence:
+                              type: number
+                            severity:
+                              type: string
+                            description:
+                              type: string
+                            supportingEvidence:
+                              type: array
+                              items:
+                                type: string
+                      recommendedActions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            action:
+                              type: string
+                            scheduledFor:
+                              type: string
+                              format: date-time
+                            reasoning:
+                              type: string
+                            status:
+                              type: string
+                      resourceForecast:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            time:
+                              type: string
+                              format: date-time
+                            cpuMillicores:
+                              type: integer
+                            memoryMB:
+                              type: integer
+                            replicas:
+                              type: integer
